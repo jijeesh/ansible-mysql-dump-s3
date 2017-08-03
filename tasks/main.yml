@@ -1,0 +1,33 @@
+---
+# tasks file for ansible-mysql-dump-s3
+
+- include_vars: sqlinfo.yml
+- name: get db names
+  shell: 'mysql -u{{mysql_username}} -p{{mysql_passwd}} -e "show databases;"'
+  register: dblist
+
+
+- command: echo {{ item }}
+  with_items:
+      - "{{ dblist.stdout_lines | difference(exclude_db) }}"
+
+#- mysql_db:
+#    state: dump
+#    name: "{{ item }}"
+#    target: "/var/backup/mysql/{{ item }}.sql"
+#    login_user: root
+#    login_password: password
+#  with_items:
+#      - "{{ dblist.stdout_lines | difference(exclude_db) }}"
+
+
+
+- command: echo {{ item }}
+  with_items:
+      - "{{ ansible_os_family }}"
+      - "{{ ansible_distribution }}"
+      - "{{ ansible_distribution_major_version }}"
+      - "{{ ansible_nodename }}"
+      - "{{ ansible_hostname }}"
+
+

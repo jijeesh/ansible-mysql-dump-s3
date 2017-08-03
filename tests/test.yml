@@ -1,0 +1,5 @@
+---
+- hosts: server9
+  remote_user: root
+  roles:
+    - ansible-mysql-dump-s3

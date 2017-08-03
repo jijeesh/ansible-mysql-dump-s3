@@ -1,0 +1,10 @@
+---
+# vars file for ansible-mysql-dump-s3
+exclude_db:
+  - 'Database'
+  - 'information_schema'
+  - 'perfomance_schema'
+  - 'mysql'
+
+
+
