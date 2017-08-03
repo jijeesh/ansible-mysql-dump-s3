@@ -1,26 +1,43 @@
 ---
 # tasks file for ansible-mysql-dump-s3
 
-- include_vars: sqlinfo.yml
+- include_vars: credentials.yml
 - name: get db names
   shell: 'mysql -u{{mysql_username}} -p{{mysql_passwd}} -e "show databases;"'
   register: dblist
 
+- name: get date and time
+  shell: /bin/date +%Y%m%d%H%M
+  register: DateT
 
-- command: echo {{ item }}
-  with_items:
-      - "{{ dblist.stdout_lines | difference(exclude_db) }}"
 
-#- mysql_db:
-#    state: dump
-#    name: "{{ item }}"
-#    target: "/var/backup/mysql/{{ item }}.sql"
-#    login_user: root
-#    login_password: password
+#- command: echo {{ item }}
 #  with_items:
 #      - "{{ dblist.stdout_lines | difference(exclude_db) }}"
 
+- mysql_db:
+    state: dump
+    name: "{{ item }}"
+    target: "/var/backup/mysql/{{ item }}-{{ DateT.stdout }}.sql"
+#    target: "/var/backup/mysql/{{ item }}.sql"
+    login_user: "{{mysql_username}}"
+    login_password: "{{mysql_passwd}}"
+  with_items:
+      - "{{ dblist.stdout_lines | difference(exclude_db) }}"
 
+#- s3: aws_access_key={{aws_access_key}} aws_secret_key={{aws_secret_key}} bucket=miproject src=/var/backup/mysql/{{ item }}-{{ date }}.sql object=miproject/backups/bqmysql/{{ item }}-{{ date }}.sql mode=put
+
+- s3:
+    bucket: miproject
+    aws_access_key: "{{aws_access_key}}"
+    aws_secret_key: "{{aws_secret_key}}"
+    object: /backups/bqmysql/{{ item }}-{{ DateT.stdout }}.sql
+    src: /var/backup/mysql/{{ item }}-{{ DateT.stdout }}.sql
+#    object: "/backups/bqmysql/{{ item }}.sql"
+#    src: "/var/backup/mysql/{{ item }}.sql"
+    mode: put
+  with_items:
+      - "{{ dblist.stdout_lines | difference(exclude_db) }}"
 
 - command: echo {{ item }}
   with_items:

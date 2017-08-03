@@ -6,5 +6,6 @@ exclude_db:
   - 'perfomance_schema'
   - 'mysql'
 
+date: "{{lookup('pipe', 'date +%Y%m%d%H%M')}}"
 
 
